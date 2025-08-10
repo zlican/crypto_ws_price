@@ -172,16 +172,32 @@ func (c *BinanceClient) connectAndListen(symbol string) {
 	// 构建WebSocket连接地址，使用K线数据流
 	wsURL := url.URL{
 		Scheme: "wss",
-		Host:   "stream.binance.com:9443",
+		Host:   "fstream.binance.com",
 		Path:   "/ws/" + symbol + "@kline_1m", // 使用1分钟K线
 	}
 
 	log.Printf("连接到 %s", wsURL.String())
 
-	// 建立WebSocket连接
-	conn, _, err := dialer.Dial(wsURL.String(), nil)
+	// 尝试建立WebSocket连接，最多尝试3次
+	var conn *websocket.Conn
+	var err error
+	maxRetries := 3
+
+	for i := 0; i < maxRetries; i++ {
+		conn, _, err = dialer.Dial(wsURL.String(), nil)
+		if err == nil {
+			break // 连接成功，跳出循环
+		}
+
+		log.Printf("连接失败 (尝试 %d/%d): %v", i+1, maxRetries, err)
+		if i < maxRetries-1 {
+			// 如果不是最后一次尝试，等待2秒后重试
+			time.Sleep(2 * time.Second)
+		}
+	}
+
 	if err != nil {
-		log.Printf("连接失败: %v", err)
+		log.Printf("连接失败，已达到最大重试次数: %v", err)
 		return
 	}
 

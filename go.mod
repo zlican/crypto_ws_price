@@ -1,4 +1,4 @@
-module binance-trend
+module crypto_price
 
 go 1.24.3
 

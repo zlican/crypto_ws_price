@@ -1,0 +1,130 @@
+[Rainmeter]
+Update=1000
+AccurateText=1
+DynamicWindowSize=1
+BackgroundMode=2
+SolidColor=0,0,0,1
+
+[Metadata]
+Name=Crypto Price Monitor
+Author=zlican
+Information=展示 BTC 和 ETH 实时价格（柔和科技风格）
+Version=1.0
+
+[Variables]
+APIHost=127.0.0.1
+APIPort=8081
+
+; 字体设置
+FontName=华文楷体
+FontSize=15
+FontSizeTitle=16
+FontGlowSize=3
+FontGlowColor=255,255,255,25
+
+; 字体颜色
+FontColor=240,240,240,255
+FontTitleColor=220,230,255,255
+PriceColor=0,191,255
+
+; 布局设置
+PaddingX=24
+PaddingY=20
+LineHeight=34
+BoxWidth=228
+BoxHeight=128
+CornerRadius=20
+BackgroundAlpha=180
+
+; 优化后的颜色方案 - 更协调的柔和科技风格
+GlassEffect=25,30,45,#BackgroundAlpha#  ; 更深的科技蓝背景
+GlassGradient=40,45,70,#BackgroundAlpha#  ; 更平滑的渐变
+BorderColor=90,110,200,80  ; 更明显的边框
+GlowColor=70,90,220,60  ; 增强光晕效果
+AccentColor=100,180,255,255  ; 更亮的强调色
+
+; ========== 背景形状 ==========
+[ShapeBackground]
+Meter=Shape
+X=0
+Y=0
+Shape=Rectangle 0,0,#BoxWidth#,#BoxHeight#,#CornerRadius# | Fill LinearGradient MyGradient | StrokeWidth 1 | Stroke Color #BorderColor#
+MyGradient=90 | #GlassEffect# ; 0.0 | #GlassGradient# ; 1.0
+Shape2=Rectangle 2,2,(#BoxWidth#-4),(#BoxHeight#-4),#CornerRadius# | StrokeWidth 4 | Stroke Color #GlowColor# | Fill Color 0,0,0,0
+Shape3=Rectangle 8,8,(#BoxWidth#-16),2,2 | Fill Color 255,255,255,30 | StrokeWidth=0
+DynamicVariables=1
+
+; ========== 标题 ==========
+[MeterTitle]
+Meter=String
+FontFace=#FontName#
+FontSize=#FontSizeTitle#
+FontColor=#FontTitleColor#
+StringStyle=Bold
+X=#PaddingX#
+Y=14
+AntiAlias=1
+Text=Price
+EffectColor=#AccentColor#,150
+Effect=Glow
+
+; ========== 更新时间 ==========
+[MeasureTime]
+Measure=Time
+Format=%H:%M:%S
+UpdateDivider=1
+
+[MeterUpdateTime]
+Meter=String
+MeasureName=MeasureTime
+FontFace=#FontName#
+FontSize=11
+FontColor=170,180,200,220
+X=(#BoxWidth#-#PaddingX#)
+Y=17
+StringAlign=Right
+AntiAlias=1
+Text=Updated: %1
+DynamicVariables=1
+
+; ========== 获取价格 ==========
+[MeasureBTCPrice]
+Measure=WebParser
+URL=http://#APIHost#:#APIPort#/api/price/btc?format=text
+RegExp="BTC Price:\s*([\d\.]+)"
+StringIndex=1
+UpdateRate=5
+
+; ========== 显示 BTC ==========
+[MeterBTCPrice]
+Meter=String
+MeasureName=MeasureBTCPrice
+FontFace=#FontName#
+FontSize=#FontSize#
+FontColor=#PriceColor#
+X=#PaddingX#
+Y=60
+AntiAlias=1
+Text=BTC:	$%1
+DynamicVariables=1
+
+; ========== 获取 ETH 价格 ==========
+[MeasureETHPrice]
+Measure=WebParser
+URL=http://#APIHost#:#APIPort#/api/price/eth?format=text
+RegExp="ETH Price:\s*([\d\.]+)"
+StringIndex=1
+UpdateRate=5
+
+; ========== 显示 ETH ==========
+[MeterETHPrice]
+Meter=String
+MeasureName=MeasureETHPrice
+FontFace=#FontName#
+FontSize=#FontSize#
+FontColor=#PriceColor#
+X=#PaddingX#
+Y=88
+AntiAlias=1
+Text=ETH:	$%1
+DynamicVariables=1

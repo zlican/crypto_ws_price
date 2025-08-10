@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"binance-trend/utils"
+	"crypto_price/utils"
 )
 
 func main() {

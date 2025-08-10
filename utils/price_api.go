@@ -25,16 +25,16 @@ func NewPriceAPI(port int, dataManager *MarketDataManager) *PriceAPI {
 
 // Start 启动API服务器
 func (api *PriceAPI) Start() error {
-	// 设置路由
-	http.HandleFunc("/api/prices", api.handleGetAllPrices)
-	http.HandleFunc("/api/price/btc", api.handleGetBTCPrice)
-	http.HandleFunc("/api/price/eth", api.handleGetETHPrice)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/prices", api.handleGetAllPrices)
+	mux.HandleFunc("/api/price/btc", api.handleGetBTCPrice)
+	mux.HandleFunc("/api/price/eth", api.handleGetETHPrice)
 
-	// 启动服务器
 	addr := fmt.Sprintf(":%d", api.Port)
 	log.Printf("API服务器启动在 http://localhost%s", addr)
 
-	return http.ListenAndServe(addr, nil)
+	// 加上 CORS 中间件
+	return http.ListenAndServe(addr, corsMiddleware(mux))
 }
 
 // handleGetAllPrices 处理获取所有价格的请求
@@ -123,4 +123,21 @@ func (api *PriceAPI) handleGetETHPrice(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
+}
+
+// corsMiddleware 处理跨域请求
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // 允许所有域访问
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// 处理预检请求
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
